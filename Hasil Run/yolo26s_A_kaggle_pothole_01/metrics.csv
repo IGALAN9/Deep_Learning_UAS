@@ -1,0 +1,2 @@
+model,skema,split,checkpoint,jumlah_training,jumlah_validation,jumlah_testing,precision,recall,mAP50,mAP50_95,dataset_fingerprint
+yolo26s,A,kaggle_original,best.pt,3345,397,198,0.915284423445875,0.8733197815653324,0.9314724024745482,0.6615485030998726,42146c6bb5149fceacd525d1276f60dccd357799f176d1b1066447497f3992e5

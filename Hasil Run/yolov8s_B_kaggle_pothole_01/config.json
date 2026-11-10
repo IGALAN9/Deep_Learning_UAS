@@ -1,0 +1,18 @@
+{
+  "model": "yolov8s.pt",
+  "classes": [
+    "pothole"
+  ],
+  "skema": "B",
+  "imgsz": 640,
+  "batch": 8,
+  "epochs": 45,
+  "patience": 10,
+  "close_mosaic": 5,
+  "optimizer": "auto",
+  "seed": 42,
+  "ultralytics": "8.4.202",
+  "split": "kaggle_original",
+  "dataset": "muskanverma24/pothole-detection-dataset-yolov11-optimized",
+  "dataset_fingerprint": "42146c6bb5149fceacd525d1276f60dccd357799f176d1b1066447497f3992e5"
+}
