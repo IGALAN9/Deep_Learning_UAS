@@ -1,0 +1,15 @@
+.git
+.venv
+__pycache__
+**/__pycache__
+.env
+.ultralytics
+Hasil Run
+Past Experiement
+*.ipynb
+tests
+bruno
+.devcontainer
+runs
+data
+test_ui.html

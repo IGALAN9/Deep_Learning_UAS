@@ -1,0 +1,4 @@
+split,images,ratio,target_ratio,boxes,groups,archive6,archive7
+train,2751,0.799942,0.8,3193,1139,2751,0
+valid,344,0.100029,0.1,406,142,344,0
+test,344,0.100029,0.1,352,142,344,0

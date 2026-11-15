@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pothole-yolo26-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health/combined
+    envVars:
+      - key: YOLO_DEVICE
+        value: cpu
+

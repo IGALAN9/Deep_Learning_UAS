@@ -1,0 +1,2 @@
+model,skema,checkpoint,jumlah_training,jumlah_validation,jumlah_testing,split_seed,dataset_fingerprint,val_precision,val_recall,val_mAP50,val_mAP50_95,test_precision,test_recall,test_mAP50,test_mAP50_95
+yolo26s,A,best.pt,2751,344,344,42,531375a0d893548daa42d0a0aafc5460a2cd6962399d09627dd6134350304cee,0.8967765992467149,0.7703415114745501,0.7990504651675556,0.6175389765861239,0.9765755692361767,0.9475127966837374,0.9647973814292992,0.7406182585992346

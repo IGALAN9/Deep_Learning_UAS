@@ -1,0 +1,25 @@
+{
+  "model": "YOLO26s",
+  "scheme": "A",
+  "task": "detect",
+  "classes": {
+    "0": "pothole"
+  },
+  "source_checkpoint": "Hasil Run/yolo26s_A_kaggle_pothole_01/weights/best.pt",
+  "sha256": "bd007569d738912d6a604c4880feabddde77e2335d8243b96ec3250bb0d2b4cb",
+  "training_ultralytics_version": "8.4.202",
+  "image_size": 640,
+  "dataset": "muskanverma24/pothole-detection-dataset-yolov11-optimized",
+  "dataset_fingerprint": "42146c6bb5149fceacd525d1276f60dccd357799f176d1b1066447497f3992e5",
+  "test_metrics": {
+    "precision": 0.915284423445875,
+    "recall": 0.8733197815653324,
+    "mAP50": 0.9314724024745482,
+    "mAP50_95": 0.6615485030998726
+  },
+  "split_counts": {
+    "jumlah_training": 3345,
+    "jumlah_validation": 397,
+    "jumlah_testing": 198
+  }
+}

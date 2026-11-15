@@ -1,0 +1,23 @@
+{
+  "model": "yolo26s.pt",
+  "classes": [
+    "cracks"
+  ],
+  "skema": "B",
+  "imgsz": 640,
+  "batch": 8,
+  "epochs": 45,
+  "patience": 10,
+  "close_mosaic": 5,
+  "optimizer": "auto",
+  "train_seed": 42,
+  "split_seed": 42,
+  "ratios": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "split": "roads_bridges_group_random_80_10_10",
+  "dataset_fingerprint": "531375a0d893548daa42d0a0aafc5460a2cd6962399d09627dd6134350304cee",
+  "ultralytics": "8.4.202"
+}

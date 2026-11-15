@@ -1,0 +1,58 @@
+{
+  "seed": 42,
+  "target_ratios": {
+    "train": 0.8,
+    "valid": 0.1,
+    "test": 0.1
+  },
+  "source_zip": "roads_bridges_full_bbox_source.zip",
+  "source_sha256": "6b1ca1c7c20499f1edf95a02af56c2c719a24005b90f1a243d97b040e4c2b118",
+  "fingerprint": "531375a0d893548daa42d0a0aafc5460a2cd6962399d09627dd6134350304cee",
+  "total_images": 3439,
+  "dataset_sources": [
+    "archive6"
+  ],
+  "source_image_counts": {
+    "archive6": 3439
+  },
+  "total_groups": 1423,
+  "similarity_pairs": 3053,
+  "group_method": "Roboflow original basename; archive7 whole capture-date/undated snapshots; union all near-duplicate pairs",
+  "similarity_method": "8 rotation/flip pHashes, Hamming <=4; mean-centered 64px MAE <=8",
+  "split_method": "Seeded weighted group allocation balanced by image count and source; no group divided",
+  "limitation": "Capture dates are inferred from filenames, not verified recording/location IDs. Similarity detection is heuristic. Existing archive6 augmentations remain together, including when a whole group is held out.",
+  "summary": [
+    {
+      "split": "train",
+      "images": 2751,
+      "ratio": 0.799942,
+      "target_ratio": 0.8,
+      "boxes": 3193,
+      "groups": 1139,
+      "archive6": 2751,
+      "archive7": 0
+    },
+    {
+      "split": "valid",
+      "images": 344,
+      "ratio": 0.100029,
+      "target_ratio": 0.1,
+      "boxes": 406,
+      "groups": 142,
+      "archive6": 344,
+      "archive7": 0
+    },
+    {
+      "split": "test",
+      "images": 344,
+      "ratio": 0.100029,
+      "target_ratio": 0.1,
+      "boxes": 352,
+      "groups": 142,
+      "archive6": 344,
+      "archive7": 0
+    }
+  ],
+  "dataset_id": "roads_bridges_cracks_full",
+  "original_source_sha256": "8db99c833d06c01fbd4536fb4830f8b05f7ad3916530424fc97c43dbf6b13c87"
+}

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test API Crack dan Pothole</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f5f7; color: #20242b; font: 15px/1.5 system-ui, sans-serif; }
+    main { max-width: 900px; margin: 32px auto; padding: 24px; background: white; border: 1px solid #dde0e5; border-radius: 12px; }
+    h1 { margin: 0; font-size: 24px; }
+    p { margin: 6px 0 20px; color: #616875; }
+    fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input, button { font: inherit; }
+    input { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #c6cbd3; border-radius: 6px; }
+    input[type="file"] { background: #fafafa; }
+    button { padding: 9px 16px; border: 1px solid #1e5fd1; border-radius: 6px; background: #1e5fd1; color: white; cursor: pointer; }
+    button.secondary { color: #20242b; border-color: #c6cbd3; background: white; white-space: nowrap; }
+    button:disabled { opacity: .55; cursor: default; }
+    :focus-visible { outline: 3px solid #90baff; outline-offset: 2px; }
+    .address { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .upload { display: grid; grid-template-columns: 1fr 140px; gap: 16px; margin-bottom: 16px; }
+    .hint { display: block; margin-top: 5px; color: #616875; font-size: 13px; }
+    #status { margin-top: 16px; min-height: 24px; overflow-wrap: anywhere; }
+    #status.error { color: #b42318; }
+    #status.success { color: #11643b; }
+    #preview { margin: 20px 0 0; padding: 12px; text-align: center; border: 1px solid #dde0e5; border-radius: 8px; background: #fafafa; }
+    canvas { display: block; max-width: 100%; max-height: 65vh; width: auto; height: auto; margin: auto; }
+    figcaption { margin-top: 8px; font-size: 13px; color: #616875; overflow-wrap: anywhere; }
+    #summary { margin-top: 20px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; text-align: left; }
+    th, td { padding: 8px; border-bottom: 1px solid #e6e8ec; }
+    th { color: #616875; font-size: 13px; }
+    details { margin-top: 16px; }
+    summary { cursor: pointer; }
+    pre { background: #f4f5f7; padding: 12px; border-radius: 6px; overflow: auto; max-height: 320px; font-size: 12px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 600px) {
+      main { margin: 12px; padding: 16px; }
+      .address { flex-wrap: wrap; }
+      .upload { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Test API Crack dan Pothole</h1>
+    <p>YOLO26s Skema A · Satu foto diperiksa oleh model pothole dan crack.</p>
+    <p class="hint"><strong style="color:#c62828">Merah: pothole</strong> · <strong style="color:#1565c0">Biru: crack</strong></p>
+
+    <form id="form">
+      <fieldset id="controls">
+        <label for="api-url">Alamat API</label>
+        <div class="address">
+          <input id="api-url" type="url" value="http://127.0.0.1:8000" placeholder="http://127.0.0.1:8000" required>
+          <button id="check" class="secondary" type="button">Cek API</button>
+        </div>
+        <div class="upload">
+          <div>
+            <label for="photo">Foto jalan</label>
+            <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+            <span class="hint">JPG, PNG, atau WebP. Maksimal 10 MB dan 16 megapiksel.</span>
+          </div>
+          <div>
+            <label for="confidence">Confidence</label>
+            <input id="confidence" type="number" min="0.01" max="1" step="0.01" value="0.25" required>
+          </div>
+        </div>
+        <button id="predict" type="submit" disabled>Prediksi foto</button>
+      </fieldset>
+    </form>
+
+    <div id="status" role="status" aria-live="polite">Jalankan API, lalu pilih foto untuk mulai.</div>
+
+    <figure id="preview" hidden>
+      <canvas id="canvas" role="img" aria-label="Pratinjau foto jalan"></canvas>
+      <figcaption id="caption"></figcaption>
+    </figure>
+
+    <section id="results" aria-label="Hasil prediksi" hidden>
+      <div id="summary"></div>
+      <table id="detections" hidden>
+        <thead><tr><th>No.</th><th>Objek</th><th>Confidence</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <span class="hint">Tidak terdeteksi berarti tidak ada objek yang melewati threshold.</span>
+      <details>
+        <summary>Response JSON</summary>
+        <pre id="json"></pre>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const canvas = byId("canvas");
+    const ctx = canvas.getContext("2d");
+    let selectedFile = null;
+    let selectedImage = null;
+    let imageUrl = null;
+    let selectionVersion = 0;
+    let busy = false;
+    if (location.protocol === "http:" || location.protocol === "https:") {
+      byId("api-url").value = location.origin;
+    }
+
+    function status(message, kind = "") {
+      byId("status").textContent = message;
+      byId("status").className = kind;
+    }
+
+    function setBusy(value) {
+      busy = value;
+      byId("controls").disabled = value;
+      byId("predict").disabled = value || !selectedImage;
+      byId("predict").textContent = value ? "Mohon tunggu..." : "Prediksi foto";
+    }
+
+    function apiBase() {
+      const url = new URL(byId("api-url").value.trim());
+      if (!["http:", "https:"].includes(url.protocol) || url.search || url.hash) {
+        throw new Error("Isi alamat dasar API, misalnya http://127.0.0.1:8000.");
+      }
+      return url.href.replace(/\/+$/, "");
+    }
+
+    async function request(path, options = {}) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 90000);
+      try {
+        const response = await fetch(apiBase() + path, { ...options, signal: controller.signal });
+        const raw = await response.text();
+        let data;
+        try { data = JSON.parse(raw); }
+        catch { throw new Error(`API mengembalikan response non-JSON (HTTP ${response.status}). Periksa alamat API.`); }
+        if (!response.ok) {
+          const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail || data);
+          throw new Error(`HTTP ${response.status}: ${detail}`);
+        }
+        return data;
+      } catch (error) {
+        if (error.name === "AbortError") throw new Error("Waktu tunggu habis (90 detik). Coba lagi setelah API siap.");
+        if (error instanceof TypeError) throw new Error("API tidak dapat dihubungi. Periksa alamat, pastikan API berjalan, dan izinkan origin UI pada CORS API.");
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function drawImage() {
+      canvas.width = selectedImage.naturalWidth;
+      canvas.height = selectedImage.naturalHeight;
+      ctx.drawImage(selectedImage, 0, 0);
+      canvas.setAttribute("aria-label", "Pratinjau foto jalan");
+    }
+
+    function drawDetections(data) {
+      drawImage();
+      const scaleX = canvas.width / data.width;
+      const scaleY = canvas.height / data.height;
+      const fontSize = Math.max(14, Math.round(canvas.width / 65));
+      ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
+      ctx.textBaseline = "top";
+      ctx.lineWidth = Math.max(2, Math.round(canvas.width / 400));
+      for (const detection of data.detections) {
+        const { x1, y1, x2, y2 } = detection.bbox;
+        const x = x1 * scaleX;
+        const y = y1 * scaleY;
+        const color = detection.class_name === "cracks" ? "#1565c0" : "#c62828";
+        ctx.strokeStyle = color;
+        ctx.strokeRect(x, y, (x2 - x1) * scaleX, (y2 - y1) * scaleY);
+        const label = `${detection.class_name} ${(detection.confidence * 100).toFixed(1)}%`;
+        const labelWidth = ctx.measureText(label).width + 12;
+        const labelHeight = fontSize + 10;
+        const labelX = Math.max(0, Math.min(x, canvas.width - labelWidth));
+        const labelY = Math.max(0, Math.min(y - labelHeight, canvas.height - labelHeight));
+        ctx.fillStyle = color;
+        ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
+        ctx.fillStyle = "white";
+        ctx.fillText(label, labelX + 6, labelY + 4);
+      }
+      canvas.setAttribute("aria-label", `Hasil deteksi: ${data.counts.pothole} pothole dan ${data.counts.cracks} crack`);
+    }
+
+    byId("photo").addEventListener("change", async () => {
+      const version = ++selectionVersion;
+      selectedFile = null;
+      selectedImage = null;
+      byId("predict").disabled = true;
+      byId("preview").hidden = true;
+      byId("results").hidden = true;
+      byId("rows").replaceChildren();
+      byId("json").textContent = "";
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      imageUrl = null;
+      const file = byId("photo").files[0];
+      if (!file) { status("Pilih foto untuk mulai."); return; }
+      if (file.size > 10 * 1024 * 1024) { status("Ukuran foto maksimal 10 MB.", "error"); return; }
+      if (!/\.(jpe?g|png|webp)$/i.test(file.name)) { status("Pilih foto JPG, PNG, atau WebP.", "error"); return; }
+      status("Memuat foto...");
+      const url = URL.createObjectURL(file);
+      imageUrl = url;
+      try {
+        const image = new Image();
+        image.src = url;
+        await image.decode();
+        if (version !== selectionVersion) return;
+        if (image.naturalWidth * image.naturalHeight > 16000000) {
+          throw new Error("Resolusi foto maksimal 16 megapiksel.");
+        }
+        selectedFile = file;
+        selectedImage = image;
+        drawImage();
+        byId("caption").textContent = `${file.name} · ${image.naturalWidth} × ${image.naturalHeight}`;
+        byId("preview").hidden = false;
+        byId("predict").disabled = busy;
+        status("Foto siap. Klik Prediksi foto.");
+      } catch (error) {
+        if (version === selectionVersion) status(error.message || "Foto tidak dapat dibaca.", "error");
+      }
+    });
+
+    byId("check").addEventListener("click", async () => {
+      if (busy) return;
+      setBusy(true);
+      status("Menghubungkan ke API...");
+      try {
+        const data = await request("/health/combined");
+        if (!data.combined_ready) throw new Error("API terhubung, tetapi kedua model belum siap.");
+        status("API terhubung. Model crack dan pothole siap digunakan.", "success");
+      } catch (error) {
+        status(error.message, "error");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    byId("form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (busy || !selectedFile || !selectedImage) return;
+      const confidence = Number(byId("confidence").value);
+      if (!Number.isFinite(confidence) || confidence < 0.01 || confidence > 1) {
+        status("Confidence harus berada antara 0,01 dan 1.", "error");
+        return;
+      }
+      setBusy(true);
+      byId("results").hidden = true;
+      drawImage();
+      status("Memprediksi foto...");
+      try {
+        const form = new FormData();
+        form.append("file", selectedFile);
+        const data = await request(`/predict/combined?confidence=${confidence}`, { method: "POST", body: form });
+        if (!Array.isArray(data.detections) || !data.counts || !(data.width > 0) || !(data.height > 0)) {
+          throw new Error("Format response API tidak sesuai dengan deteksi gabungan crack dan pothole.");
+        }
+        drawDetections(data);
+        byId("summary").textContent = `${data.counts.pothole} pothole · ${data.counts.cracks} crack · ${Number(data.processing_time_ms).toFixed(0)} ms`;
+        byId("rows").replaceChildren();
+        data.detections.forEach((detection, index) => {
+          const row = document.createElement("tr");
+          [index + 1, detection.class_name, `${(detection.confidence * 100).toFixed(1)}%`].forEach((value) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.append(cell);
+          });
+          byId("rows").append(row);
+        });
+        byId("detections").hidden = data.detections.length === 0;
+        byId("json").textContent = JSON.stringify(data, null, 2);
+        byId("results").hidden = false;
+        status("Prediksi selesai.", "success");
+      } catch (error) {
+        status(error.message, "error");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    });
+  </script>
+</body>
+</html>
