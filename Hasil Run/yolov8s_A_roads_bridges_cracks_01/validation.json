@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "images": 3439,
+  "groups": 1423,
+  "known_cross_split_groups": 0,
+  "known_cross_split_pixel_hashes": 0,
+  "known_cross_split_similar_pairs": 0,
+  "images_and_labels_hash_verified": true,
+  "all_labels_class_zero_bbox": true,
+  "caveat": "Pemeriksaan metadata dan kemiripan bersifat heuristik; bukan jaminan independensi lokasi/rekaman."
+}

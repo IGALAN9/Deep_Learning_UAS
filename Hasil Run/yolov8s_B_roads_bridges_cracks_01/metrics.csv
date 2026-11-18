@@ -1,0 +1,2 @@
+model,skema,checkpoint,jumlah_training,jumlah_validation,jumlah_testing,split_seed,dataset_fingerprint,val_precision,val_recall,val_mAP50,val_mAP50_95,test_precision,test_recall,test_mAP50,test_mAP50_95
+yolov8s,B,best.pt,2751,344,344,42,531375a0d893548daa42d0a0aafc5460a2cd6962399d09627dd6134350304cee,0.9021512989869632,0.7610837438423645,0.7856397981642252,0.5856451337940101,0.9586485542839852,0.9220512676476453,0.9570242681599009,0.734540682477373

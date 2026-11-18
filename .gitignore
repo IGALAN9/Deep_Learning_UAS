@@ -8,3 +8,5 @@ Ultralytics/
 runs/
 src/logs/runtime/
 data
+.devcontainer
+NVIDIA CORPORATION
